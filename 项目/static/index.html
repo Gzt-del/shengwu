@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BioNova · 生物信息学智能分析平台</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2338bdf8'/%3E%3Cstop offset='1' stop-color='%23818cf8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='%230b1224'/%3E%3Cpath d='M10 6c0 8 12 8 12 16M22 6c0 8-12 8-12 16' stroke='url(%23g)' stroke-width='2.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="bg-aurora" aria-hidden="true"></div>
+
+<!-- ═══════════ 侧边栏 ═══════════ -->
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brand-logo">
+      <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">
+        <defs><linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#38bdf8"/><stop offset="1" stop-color="#818cf8"/>
+        </linearGradient></defs>
+        <path d="M9 5c0 9 14 9 14 22M23 5c0 9-14 9-14 22" stroke="url(#bg1)" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+        <circle cx="11" cy="10" r="2.2" fill="#38bdf8"/><circle cx="21" cy="15" r="2.2" fill="#818cf8"/><circle cx="11" cy="22" r="2.2" fill="#34d399"/>
+      </svg>
+    </div>
+    <div class="brand-text">
+      <h1>BioNova</h1>
+      <p>生物信息学智能分析平台</p>
+    </div>
+  </div>
+
+  <nav class="nav" id="nav">
+    <div class="nav-label">分析模块</div>
+    <button class="nav-item active" data-page="stats">
+      <svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-8M21 20H3" stroke-linecap="round"/></svg>
+      <span>序列概览</span><em>组成 · GC · 滑窗</em>
+    </button>
+    <button class="nav-item" data-page="align">
+      <svg viewBox="0 0 24 24"><path d="M3 8h8m4 0h6M3 16h6m4 0h8M7 5v6M14 13v6" stroke-linecap="round"/></svg>
+      <span>序列比对</span><em>NW / SW 算法</em>
+    </button>
+    <button class="nav-item" data-page="orf">
+      <svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="M14.5 14.5 21 21M8 10h4M10 8v4" stroke-linecap="round"/></svg>
+      <span>ORF 与翻译</span><em>六框 · 密码子</em>
+    </button>
+    <button class="nav-item" data-page="enzyme">
+      <svg viewBox="0 0 24 24"><circle cx="6" cy="18" r="2.6"/><circle cx="6" cy="6" r="2.6"/><path d="M8.2 7.6 20 18M8.2 16.4 20 6" stroke-linecap="round"/></svg>
+      <span>酶切图谱</span><em>限制性内切酶</em>
+    </button>
+    <button class="nav-item" data-page="phylo">
+      <svg viewBox="0 0 24 24"><path d="M4 6h5v5h6M4 18h5v-5M15 11v6h5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="20" cy="17" r="1.6" fill="currentColor" stroke="none"/><circle cx="9" cy="6" r="1.4" fill="currentColor" stroke="none"/></svg>
+      <span>系统发育</span><em>邻接法建树</em>
+    </button>
+    <button class="nav-item" data-page="cluster">
+      <svg viewBox="0 0 24 24"><circle cx="7" cy="7" r="2.4"/><circle cx="17" cy="8" r="2.4"/><circle cx="9" cy="17" r="2.4"/><circle cx="17" cy="16" r="2.4"/><path d="M9 8.4l5.6-.9M8.3 9.2l.6 5.4M11.3 16.4l3.4-.6M16.4 10.3l.3 3.4" stroke-linecap="round"/></svg>
+      <span>序列聚类</span><em>k-mer · PCoA</em>
+    </button>
+  </nav>
+
+  <div class="sidebar-foot">
+    <div class="foot-pill"><span class="dot"></span> 离线可用 · 零依赖</div>
+    <p>福州大学 · 人工智能专业<br>生物信息学课程项目 · v1.0</p>
+  </div>
+</aside>
+
+<!-- ═══════════ 主区域 ═══════════ -->
+<main class="main">
+  <header class="topbar">
+    <div>
+      <h2 id="pageTitle">序列概览</h2>
+      <p id="pageDesc">序列组成、GC 含量与滑窗变异分析</p>
+    </div>
+    <div class="topbar-actions">
+      <div class="select-wrap">
+        <select id="globalSample" title="加载内置示例数据">
+          <option value="">加载示例数据…</option>
+        </select>
+      </div>
+      <button class="btn ghost" id="btnHelp" title="项目说明">使用说明</button>
+    </div>
+  </header>
+
+  <!-- ─────────── 1. 序列概览 ─────────── -->
+  <section class="page active" id="page-stats">
+    <div class="card input-card">
+      <div class="card-head">
+        <h3><span class="step">01</span> 输入序列</h3>
+        <div class="card-tools">
+          <button class="btn small ghost" data-clear="statsInput">清空</button>
+          <button class="btn primary" id="runStats">开始分析</button>
+        </div>
+      </div>
+      <textarea id="statsInput" class="seq-input" spellcheck="false"
+        placeholder="粘贴 FASTA 格式序列（支持多条）…&#10;&gt;seq1 example&#10;ATGCGTACGTTAGCCTGAC…"></textarea>
+      <div class="input-hint">支持 FASTA 或裸序列；多条序列请以 <b>&gt;名称</b> 分行标注</div>
+      <div class="param-row">
+        <label>滑窗大小 <input type="number" id="gcWindow" value="100" min="10" max="5000"></label>
+        <label>步长 <input type="number" id="gcStep" value="50" min="1" max="5000"></label>
+      </div>
+    </div>
+
+    <div class="tiles" id="statsTiles" hidden></div>
+
+    <div class="grid-2">
+      <div class="card" id="compCard" hidden>
+        <div class="card-head"><h3>碱基 / 残基组成</h3></div>
+        <div class="donut-wrap"><svg id="compDonut" viewBox="0 0 240 240"></svg>
+          <div class="donut-center" id="donutCenter"></div>
+        </div>
+        <div class="legend" id="compLegend"></div>
+      </div>
+      <div class="card" id="seqTableCard" hidden>
+        <div class="card-head"><h3>序列明细</h3></div>
+        <div class="table-scroll"><table class="data-table" id="seqTable"></table></div>
+      </div>
+    </div>
+
+    <div class="card" id="gcCard" hidden>
+      <div class="card-head"><h3>滑窗 GC 含量曲线 <small id="gcFocus"></small></h3></div>
+      <div class="chart" id="gcChart"></div>
+    </div>
+    <div class="card" id="skewCard" hidden>
+      <div class="card-head"><h3>GC-Skew 曲线 <small>（G−C)/(G+C)，正值富集 G，可用于复制起点推测）</small></h3></div>
+      <div class="chart" id="skewChart"></div>
+    </div>
+  </section>
+
+  <!-- ─────────── 2. 序列比对 ─────────── -->
+  <section class="page" id="page-align">
+    <div class="card input-card">
+      <div class="card-head">
+        <h3><span class="step">01</span> 输入两条序列</h3>
+        <div class="card-tools">
+          <div class="seg" id="alignMode">
+            <button class="active" data-v="global">全局比对 NW</button>
+            <button data-v="local">局部比对 SW</button>
+          </div>
+          <button class="btn primary" id="runAlign">运行比对</button>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="seq-box">
+          <label>序列 A</label>
+          <textarea id="alignA" class="seq-input" spellcheck="false" placeholder="粘贴序列 A（FASTA 或裸序列）"></textarea>
+        </div>
+        <div class="seq-box">
+          <label>序列 B</label>
+          <textarea id="alignB" class="seq-input" spellcheck="false" placeholder="粘贴序列 B（FASTA 或裸序列）"></textarea>
+        </div>
+      </div>
+      <div class="param-row">
+        <label>匹配得分 <input type="number" id="alMatch" value="1" step="0.5" min="0"></label>
+        <label>错配罚分 <input type="number" id="alMismatch" value="1" step="0.5" min="0"></label>
+        <label>空位罚分 <input type="number" id="alGap" value="1" step="0.5" min="0"></label>
+        <span class="param-note">线性 gap 模型：score = 匹配数×match − 错配数×mismatch − 空位数×gap</span>
+      </div>
+    </div>
+
+    <div class="tiles" id="alignTiles" hidden></div>
+
+    <div class="card" id="alnViewCard" hidden>
+      <div class="card-head">
+        <h3>比对结果视图</h3>
+        <div class="card-tools"><button class="btn small ghost" id="copyAln">复制比对</button></div>
+      </div>
+      <div class="aln-view" id="alnView"></div>
+      <div class="aln-meta" id="alnMeta"></div>
+    </div>
+
+    <div class="card" id="dpCard" hidden>
+      <div class="card-head"><h3>DP 打分矩阵（左上角预览）<small>颜色越亮分数越高，回溯路径沿最高分方向</small></h3></div>
+      <div class="dp-wrap"><svg id="dpHeat" viewBox="0 0 640 420" preserveAspectRatio="xMinYMin meet"></svg></div>
+    </div>
+  </section>
+
+  <!-- ─────────── 3. ORF 与翻译 ─────────── -->
+  <section class="page" id="page-orf">
+    <div class="card input-card">
+      <div class="card-head">
+        <h3><span class="step">01</span> 输入核酸序列</h3>
+        <button class="btn primary" id="runOrf">查找 ORF</button>
+      </div>
+      <textarea id="orfInput" class="seq-input" spellcheck="false"
+        placeholder="粘贴 DNA 序列（FASTA 或裸序列）…"></textarea>
+      <div class="param-row">
+        <label>最小肽长 <input type="number" id="orfMin" value="30" min="5" max="2000"> aa</label>
+        <label class="chk"><input type="checkbox" id="orfBoth" checked> 检索双链</label>
+        <fieldset class="starts">
+          <legend>起始密码子</legend>
+          <label><input type="checkbox" class="start-codon" value="ATG" checked>ATG</label>
+          <label><input type="checkbox" class="start-codon" value="GTG">GTG</label>
+          <label><input type="checkbox" class="start-codon" value="TTG">TTG</label>
+          <label><input type="checkbox" class="start-codon" value="CTG">CTG</label>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="tiles" id="orfTiles" hidden></div>
+
+    <div class="card" id="orfTableCard" hidden>
+      <div class="card-head"><h3>开放阅读框列表 <small>点击行查看蛋白质详情</small></h3></div>
+      <div class="table-scroll"><table class="data-table" id="orfTable"></table></div>
+    </div>
+
+    <div class="grid-2" id="orfDetailRow" hidden>
+      <div class="card" id="protCard">
+        <div class="card-head"><h3 id="protTitle">蛋白质序列</h3></div>
+        <div class="prot-view" id="protView"></div>
+        <div class="tiles sub" id="protTiles"></div>
+      </div>
+      <div class="card" id="frameCard">
+        <div class="card-head"><h3>六框翻译概览</h3></div>
+        <div class="frames" id="framesView"></div>
+      </div>
+    </div>
+
+    <div class="card" id="codonCard" hidden>
+      <div class="card-head"><h3>密码子使用频率 <small>读框 1 · 前 20 位</small></h3></div>
+      <div class="chart" id="codonChart"></div>
+    </div>
+  </section>
+
+  <!-- ─────────── 4. 酶切图谱 ─────────── -->
+  <section class="page" id="page-enzyme">
+    <div class="card input-card">
+      <div class="card-head">
+        <h3><span class="step">01</span> 输入 DNA 序列并选择酶</h3>
+        <button class="btn primary" id="runEnzyme">生成图谱</button>
+      </div>
+      <textarea id="enzInput" class="seq-input short" spellcheck="false"
+        placeholder="粘贴 DNA 序列（限制酶仅识别双链 dsDNA）…"></textarea>
+      <div class="enz-toolbar">
+        <input type="search" id="enzSearch" placeholder="搜索酶名 / 位点…">
+        <button class="btn small ghost" id="enzAll">全选</button>
+        <button class="btn small ghost" id="enzNone">清空</button>
+        <span class="enz-count" id="enzCount">已选 0 种</span>
+      </div>
+      <div class="enz-grid" id="enzGrid"></div>
+    </div>
+
+    <div class="card" id="mapCard" hidden>
+      <div class="card-head"><h3>限制性酶切图谱 <small>线性分子 · 切点位于碱基之间</small></h3></div>
+      <div class="map-wrap"><svg id="enzMap" viewBox="0 0 960 240" preserveAspectRatio="xMidYMid meet"></svg></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card" id="enzTableCard" hidden>
+        <div class="card-head"><h3>酶切位点明细</h3></div>
+        <div class="table-scroll"><table class="data-table" id="enzTable"></table></div>
+      </div>
+      <div class="card" id="fragCard" hidden>
+        <div class="card-head"><h3>片段长度分布 <small>全部所选酶共同作用</small></h3></div>
+        <div class="chart" id="fragChart"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── 5. 系统发育 ─────────── -->
+  <section class="page" id="page-phylo">
+    <div class="card input-card">
+      <div class="card-head">
+        <h3><span class="step">01</span> 输入多条序列（≥3 条）</h3>
+        <div class="card-tools">
+          <div class="select-wrap inline">
+            <select id="phyloModel">
+              <option value="jc69">Jukes-Cantor 校正</option>
+              <option value="p">p-distance（未校正）</option>
+            </select>
+          </div>
+          <button class="btn primary" id="runPhylo">构建进化树</button>
+        </div>
+      </div>
+      <textarea id="phyloInput" class="seq-input tall" spellcheck="false"
+        placeholder="粘贴多条同源序列 FASTA…&#10;&gt;sample_1&#10;ATGC…&#10;&gt;sample_2&#10;ATGC…"></textarea>
+      <div class="input-hint">序列需大致等长、已比对（或同源）；建议 ≥4 条以获得更稳定的拓扑结构</div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card" id="dmCard" hidden>
+        <div class="card-head"><h3>遗传距离矩阵 <small id="dmModel"></small></h3></div>
+        <div class="table-scroll"><table class="data-table dm-table" id="dmTable"></table></div>
+      </div>
+      <div class="card" id="nwCard" hidden>
+        <div class="card-head">
+          <h3>Newick 格式</h3>
+          <div class="card-tools"><button class="btn small ghost" id="copyNewick">复制</button></div>
+        </div>
+        <pre class="newick" id="newickOut"></pre>
+      </div>
+    </div>
+
+    <div class="card" id="treeCard" hidden>
+      <div class="card-head">
+        <h3>邻接法（Neighbor-Joining）系统发育树 <small>枝长 ∝ 遗传距离</small></h3>
+        <div class="card-tools">
+          <label class="chk"><input type="checkbox" id="treeScale" checked> 按枝长缩放</label>
+        </div>
+      </div>
+      <div class="tree-wrap"><svg id="treeSvg" viewBox="0 0 960 480" preserveAspectRatio="xMidYMid meet"></svg></div>
+    </div>
+  </section>
+
+  <!-- ─────────── 6. 序列聚类 ─────────── -->
+  <section class="page" id="page-cluster">
+    <div class="card input-card">
+      <div class="card-head">
+        <h3><span class="step">01</span> 输入多条序列（≥3 条）</h3>
+        <div class="card-tools">
+          <label class="inline-label">类簇数 k
+            <input type="number" id="cluK" value="3" min="2" max="8">
+          </label>
+          <button class="btn primary" id="runCluster">运行聚类</button>
+        </div>
+      </div>
+      <textarea id="cluInput" class="seq-input tall" spellcheck="false"
+        placeholder="粘贴多条序列 FASTA（可用与系统发育相同的示例）…"></textarea>
+      <div class="input-hint">流程：<b>3-mer 加权 Jaccard 距离 → PCoA 降维 → k-means 聚类</b>（k-means++ 初始化，固定随机种子，结果可复现）</div>
+    </div>
+
+    <div class="card" id="pcoaCard" hidden>
+      <div class="card-head">
+        <h3>PCoA 二维坐标图 <small id="pcoaExplained"></small></h3>
+        <div class="card-tools"><span class="legend-inline" id="cluLegend"></span></div>
+      </div>
+      <div class="chart tall-chart" id="pcoaChart"></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card" id="cluTableCard" hidden>
+        <div class="card-head"><h3>聚类结果</h3></div>
+        <div class="table-scroll"><table class="data-table" id="cluTable"></table></div>
+      </div>
+      <div class="card" id="cluDmCard" hidden>
+        <div class="card-head"><h3>k-mer Jaccard 距离矩阵</h3></div>
+        <div class="table-scroll"><table class="data-table dm-table" id="cluDm"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="page-foot">
+    BioNova v1.0 · 纯 Python 标准库实现 · Needleman-Wunsch / Smith-Waterman / Neighbor-Joining / PCoA + k-means
+  </footer>
+</main>
+
+<!-- 使用说明弹窗 -->
+<div class="modal" id="helpModal" hidden>
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>使用说明</h3><button class="btn small ghost" id="helpClose">关闭</button>
+    </div>
+    <div class="modal-body">
+      <h4>快速开始</h4>
+      <ol>
+        <li>点击顶部 <b>加载示例数据…</b> 选择一个内置示例，序列会自动填入当前模块；</li>
+        <li>或直接粘贴自己的 FASTA 序列，点击 <b>开始分析</b>；</li>
+        <li>所有计算在本地 Python 进程完成，数据不会离开你的电脑。</li>
+      </ol>
+      <h4>模块说明</h4>
+      <table class="data-table">
+        <tr><td>序列概览</td><td>组成统计、GC 含量、滑窗 GC / GC-Skew 曲线</td></tr>
+        <tr><td>序列比对</td><td>Needleman-Wunsch 全局 / Smith-Waterman 局部比对，含 DP 矩阵热图</td></tr>
+        <tr><td>ORF 与翻译</td><td>双链六框翻译、ORF 查找、蛋白质分子量 / 等电点等理化性质</td></tr>
+        <tr><td>酶切图谱</td><td>26 种常用限制性内切酶位点搜索与片段分析</td></tr>
+        <tr><td>系统发育</td><td>遗传距离矩阵 + 邻接法（NJ）建树，导出 Newick</td></tr>
+        <tr><td>序列聚类</td><td>k-mer 距离 + PCoA 降维 + k-means 无监督聚类</td></tr>
+      </table>
+      <h4>数据说明</h4>
+      <p>示例A 为真实的人 β-珠蛋白基因片段（前 93 bp）；其余示例均为<b>固定随机种子生成的教学用模拟序列</b>，不对应任何真实生物。</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast-host" id="toastHost"></div>
+<div class="loading" id="loading" hidden><div class="spinner"></div><span>计算中…</span></div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>

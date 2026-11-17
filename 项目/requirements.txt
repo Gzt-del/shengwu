@@ -1,0 +1,3 @@
+# BioNova 无任何第三方依赖 —— 全部基于 Python 3.8+ 标准库实现
+# （http.server / json / math / re / random / array / collections）
+# 无需执行 pip install，双击 启动项目.bat 即可运行
